@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot RBAC Demo</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; max-width: 600px; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: inline-block; width: 100px; }
+        input { padding: 0.4rem; width: 200px; }
+        button { padding: 0.5rem 1rem; margin-right: 0.5rem; cursor: pointer; }
+        #output { background: #f4f4f4; padding: 1rem; border-radius: 4px; white-space: pre-wrap; word-break: break-all; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+<h2>ログイン & アクセステスト</h2>
+
+<div class="form-group">
+    <label for="username">ユーザー名:</label>
+    <input type="text" id="username" value="admin">
+</div>
+<div class="form-group">
+    <label for="password">パスワード:</label>
+    <input type="password" id="password" value="admin123">
+</div>
+
+<div style="margin-bottom: 1rem;">
+    <button onclick="sendApiRequest('/api/admin/dashboard')">管理者エリアへアクセス</button>
+</div>
+
+<h3>レスポンス結果:</h3>
+<pre id="output">ボタンを押してレスポンスを確認してください</pre>
+
+<script>
+    async function sendApiRequest(endpoint) {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const outputEl = document.getElementById('output');
+
+        // Username:Password を Base64 エンコードして Basic 認証ヘッダーを生成
+        const credentials = btoa(`${user}:${pass}`);
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Basic ${credentials}`
+                }
+            });
+
+            const bodyText = await response.text();
+            outputEl.textContent = `ステータスコード: ${response.status}\n\n[レスポンス内容]\n${bodyText}`;
+        } catch (error) {
+            outputEl.textContent = `通信エラー: ${error.message}`;
+        }
+    }
+</script>
+</body>
+</html>
