@@ -1,14 +1,35 @@
+# ==========================================
+# React / Node.js (フロントエンド用)
+# ==========================================
+**/frontend/node_modules/
+**/frontend/dist/
+**/frontend/dist-ssr/
+*.local
+.eslintcache
+
+# ==========================================
+# Java / Maven (バックエンド用)
+# ==========================================
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 .kotlin
 
+# Maven Wrapper ログ等
+.mvn/
+mvnw
+mvnw.cmd
+
+# 静的リソース出力先（ビルド生成物のためGit管理外にする場合）
+# ※手動管理する場合はコメントアウトを解除してください
+# src/main/resources/static/assets/
+
+# ==========================================
+# IDE / エディタ設定
+# ==========================================
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -35,5 +56,13 @@ build/
 ### VS Code ###
 .vscode/
 
+# ==========================================
+# OS システムファイル
+# ==========================================
 ### Mac OS ###
 .DS_Store
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
