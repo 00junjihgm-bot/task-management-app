@@ -1,91 +1,193 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-function App() {
-    const [username, setUsername] = useState('admin');
-    const [password, setPassword] = useState('admin123');
-    const [responseLog, setResponseLog] = useState('「アクセステスト実行」ボタンを押すと結果が表示されます。');
-    const [statusColor, setStatusColor] = useState('#333');
+const API_URL = 'http://localhost:8080/api/resources';
 
-    const handleFetchAdminData = async () => {
-        // ユーザー名とパスワードを Basic 認証用に Base64 エンコード
-        const credentials = btoa(`${username}:${password}`);
+export function App() {
+    const [resources, setResources] = useState([]);
+    const [error, setError] = useState('');
+    const [formData, setFormData] = useState({
+        id: '',
+        name: '',
+        department: '',
+        position: '',
+        email: '',
+    });
+
+    // 全件取得 (GET)
+    const fetchResources = useCallback(async () => {
+        setError('');
+        try {
+            const res = await fetch(API_URL);
+            if (!res.ok) {
+                setError('データの取得に失敗しました');
+                return;
+            }
+            const data = await res.json();
+            setResources(data);
+        } catch {
+            setError('サーバーとの通信に失敗しました');
+        }
+    }, []);
+
+    // 初回ロード時
+    useEffect(() => {
+        let isMounted = true;
+        const loadData = async () => {
+            if (isMounted) {
+                await fetchResources();
+            }
+        };
+        void loadData();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [fetchResources]);
+
+    // フォーム入力のハンドリング
+    const handleChange = (e) => {
+        setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    // フォームリセット
+    const handleReset = () => {
+        setFormData({ id: '', name: '', department: '', position: '', email: '' });
+    };
+
+    // 新規登録 (POST) / 更新 (PUT)
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        const isEdit = Boolean(formData.id);
+        const method = isEdit ? 'PUT' : 'POST';
+        const url = isEdit ? `${API_URL}/${formData.id}` : API_URL;
+
+        // 新規登録時に id: "" を送信しないようペイロードを整形
+        const payload = { ...formData };
+        if (!isEdit) {
+            delete payload.id;
+        }
 
         try {
-            // ★ フルパスから相対パス (/api/admin/dashboard) に変更
-            const response = await fetch('/api/admin/dashboard', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Basic ${credentials}`,
-                    'Content-Type': 'application/json'
-                }
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
             });
 
-            const textData = await response.text();
-
-            if (response.ok) {
-                setStatusColor('green');
-                setResponseLog(`【成功】ステータスコード: ${response.status}\n\n[レスポンス内容]\n${textData}`);
-            } else {
-                setStatusColor('red');
-                setResponseLog(`【エラー】ステータスコード: ${response.status}\n\n[レスポンス内容]\n${textData}`);
+            if (!res.ok) {
+                const errorData = await res.json();
+                setError(errorData.message || '保存に失敗しました');
+                return;
             }
-        } catch (error) {
-            setStatusColor('red');
-            setResponseLog(`【通信エラー】\n${error.message}`);
+
+            handleReset();
+            await fetchResources();
+        } catch {
+            setError('サーバーとの通信に失敗しました');
+        }
+    };
+
+    // 編集モードへのセット
+    const handleEdit = (resource) => {
+        setFormData(resource);
+    };
+
+    // 削除 (DELETE)
+    const handleDelete = async (id) => {
+        if (!window.confirm('本当に削除しますか？')) return;
+        setError('');
+
+        try {
+            const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const errorData = await res.json();
+                setError(errorData.message || '削除に失敗しました');
+                return;
+            }
+            await fetchResources();
+        } catch {
+            setError('サーバーとの通信に失敗しました');
         }
     };
 
     return (
-        <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
-            <h2>統合版 React → Spring Boot 連動テスト</h2>
+        <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+            <h1>リソース（担当者）管理システム</h1>
 
-            <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'inline-block', width: '120px' }}>ユーザー名:</label>
-                <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    style={{ padding: '0.4rem', width: '200px' }}
-                />
+            {/* エラーメッセージ表示 */}
+            {error && (
+                <div style={{ color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', marginBottom: '15px', borderRadius: '4px' }}>
+                    {error}
+                </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '20px' }}>
+                {/* 一覧表示 */}
+                <div style={{ flex: 2 }}>
+                    <h2>担当者一覧</h2>
+                    <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                        <tr style={{ backgroundColor: '#f2f2f2' }}>
+                            <th>ID</th>
+                            <th>名前</th>
+                            <th>部署</th>
+                            <th>役職</th>
+                            <th>Email</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {resources.length === 0 ? (
+                            <tr>
+                                <td colSpan="6" style={{ textAlign: 'center' }}>データがありません</td>
+                            </tr>
+                        ) : (
+                            resources.map((r, index) => (
+                                // key に r.id ?? index を指定して unique key 警告を回避
+                                <tr key={r.id ?? index}>
+                                    <td>{r.id}</td>
+                                    <td>{r.name}</td>
+                                    <td>{r.department}</td>
+                                    <td>{r.position}</td>
+                                    <td>{r.email}</td>
+                                    <td>
+                                        <button onClick={() => handleEdit(r)}>編集</button>{' '}
+                                        <button onClick={() => void handleDelete(r.id)}>削除</button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* 登録・更新フォーム */}
+                <div style={{ flex: 1, border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
+                    <h2>{formData.id ? `編集 (ID: ${formData.id})` : '新規登録'}</h2>
+                    <form onSubmit={(e) => void handleSubmit(e)}>
+                        <div style={{ marginBottom: '10px' }}>
+                            <label style={{ display: 'block' }}>名前:</label>
+                            <input type="text" name="name" value={formData.name} onChange={handleChange} required style={{ width: '100%' }} />
+                        </div>
+                        <div style={{ marginBottom: '10px' }}>
+                            <label style={{ display: 'block' }}>部署:</label>
+                            <input type="text" name="department" value={formData.department} onChange={handleChange} required style={{ width: '100%' }} />
+                        </div>
+                        <div style={{ marginBottom: '10px' }}>
+                            <label style={{ display: 'block' }}>役職:</label>
+                            <input type="text" name="position" value={formData.position} onChange={handleChange} style={{ width: '100%' }} />
+                        </div>
+                        <div style={{ marginBottom: '10px' }}>
+                            <label style={{ display: 'block' }}>Email:</label>
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} required style={{ width: '100%' }} />
+                        </div>
+                        <button type="submit">{formData.id ? '更新' : '登録'}</button>{' '}
+                        <button type="button" onClick={handleReset}>キャンセル</button>
+                    </form>
+                </div>
             </div>
-
-            <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'inline-block', width: '120px' }}>パスワード:</label>
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={{ padding: '0.4rem', width: '200px' }}
-                />
-            </div>
-
-            <button
-                onClick={handleFetchAdminData}
-                style={{
-                    padding: '0.6rem 1.2rem',
-                    backgroundColor: '#007bff',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                }}
-            >
-                管理者エリアへアクセス
-            </button>
-
-            <h3>実行結果:</h3>
-            <pre
-                style={{
-                    background: '#f4f4f4',
-                    padding: '1rem',
-                    borderRadius: '4px',
-                    whiteSpace: 'pre-wrap',
-                    color: statusColor,
-                    fontWeight: 'bold'
-                }}
-            >
-        {responseLog}
-      </pre>
         </div>
     );
 }

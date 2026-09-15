@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Resource;
 import com.example.demo.service.ResourceService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,13 +15,12 @@ public class ResourceController {
 
     private final ResourceService resourceService;
 
-    // ResourceService をコンストラクタで注入
     public ResourceController(ResourceService resourceService) {
         this.resourceService = resourceService;
     }
 
     /**
-     * 全リソース（担当者情報）取得エンドポイント
+     * 全リソース取得
      * GET http://localhost:8080/api/resources
      */
     @GetMapping
@@ -29,16 +29,27 @@ public class ResourceController {
     }
 
     /**
-     * 新規リソース（担当者）登録エンドポイント
-     * POST http://localhost:8080/api/resources
+     * ID指定による単体リソース取得（詳細画面・編集用）★追加
+     * GET http://localhost:8080/api/resources/{id}
      */
-    @PostMapping
-    public Resource createResource(@RequestBody Resource resource) {
-        return resourceService.createResource(resource);
+    @GetMapping("/{id}")
+    public ResponseEntity<Resource> getResourceById(@PathVariable Integer id) {
+        Resource resource = resourceService.findResourceById(id);
+        return ResponseEntity.ok(resource);
     }
 
     /**
-     * リソース（担当者）更新エンドポイント
+     * 新規リソース登録
+     * POST http://localhost:8080/api/resources
+     */
+    @PostMapping
+    public ResponseEntity<Resource> createResource(@RequestBody Resource resource) {
+        Resource createdResource = resourceService.createResource(resource);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdResource); // 201 Created を返却
+    }
+
+    /**
+     * リソース更新
      * PUT http://localhost:8080/api/resources/{id}
      */
     @PutMapping("/{id}")
@@ -48,7 +59,7 @@ public class ResourceController {
     }
 
     /**
-     * リソース（担当者）削除エンドポイント
+     * リソース削除
      * DELETE http://localhost:8080/api/resources/{id}
      */
     @DeleteMapping("/{id}")

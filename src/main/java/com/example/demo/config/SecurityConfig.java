@@ -11,6 +11,11 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -26,10 +31,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         try {
             http
+                    // ★ 1. CORS 設定を有効化（React からのアクセス許可）
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                     .csrf(AbstractHttpConfigurer::disable)
                     .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                     .authorizeHttpRequests(auth -> auth
-                            // ★ 1. 静的リソース (画面用の全ファイル) および認証不要APIをすべて未認証許可
+                            // 静的リソース・認証不要API・開発用リソースAPIを許可
                             .requestMatchers(
                                     "/",
                                     "/index.html",
@@ -37,25 +44,39 @@ public class SecurityConfig {
                                     "/favicon.ico",
                                     "/*.svg",
                                     "/h2-console/**",
-                                    "/api/auth/**"
+                                    "/api/auth/**",
+                                    "/api/resources/**" // ★ 2. CRUD用APIを許可
                             ).permitAll()
 
-                            // 2. 管理者専用エリア (DB上の "ROLE_ADMIN" が必要)
+                            // 管理者専用エリア
                             .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                            // 3. 一般ユーザー & 管理者共有エリア (DB上の "ROLE_USER" または "ROLE_ADMIN" が必要)
+                            // 一般ユーザー & 管理者共有エリア
                             .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
 
-                            // 4. 上記以外のすべてのリクエストは認証が必要
+                            // 上記以外のすべてのリクエストは認証が必要
                             .anyRequest().authenticated()
                     )
                     .formLogin(AbstractHttpConfigurer::disable)
-                    // Basic 認証を有効化
                     .httpBasic(Customizer.withDefaults());
 
             return http.build();
         } catch (Exception e) {
             throw new RuntimeException("SecurityFilterChain 構築エラー", e);
         }
+    }
+
+    // ★ 3. React (Vite: localhost:5173) からの通信を許可する CORS 設定
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

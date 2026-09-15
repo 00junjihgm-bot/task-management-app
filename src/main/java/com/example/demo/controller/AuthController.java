@@ -5,11 +5,16 @@ import com.example.demo.entity.UserAccount;
 import com.example.demo.service.UserAccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+// ※ モノリス構成のため @CrossOrigin は不要ですが、残しておいても動作に影響はありません
 public class AuthController {
 
     private final UserAccountService userAccountService;
@@ -33,7 +38,17 @@ public class AuthController {
      * GET /api/auth/me
      */
     @GetMapping("/me")
-    public ResponseEntity<String> getCurrentUser(Authentication authentication) {
-        return ResponseEntity.ok("ログイン成功: " + authentication.getName());
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("message", "未認証です"));
+        }
+
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("username", authentication.getName());
+        userInfo.put("roles", authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
+
+        return ResponseEntity.ok(userInfo);
     }
 }
