@@ -69,83 +69,37 @@ export function App() {
 
     return (
         <div>
-            {/* 共通ヘッダーナビゲーション */}
-            <nav style={{
-                backgroundColor: '#333',
-                padding: '12px 20px',
+            {/* ヘッダーバー：ログイン者情報とログアウトボタン */}
+            <header style={{
                 display: 'flex',
-                justifyContent: 'space-between',
+                justifyContent: 'flex-end',
                 alignItems: 'center',
-                color: '#fff'
+                padding: '10px 20px',
+                backgroundColor: '#f8f9fa',
+                borderBottom: '1px solid #dee2e6',
+                gap: '15px'
             }}>
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <button
-                        onClick={() => setCurrentPage('top')}
-                        style={{
-                            backgroundColor: currentPage === 'top' ? '#555' : 'transparent',
-                            color: '#fff',
-                            border: 'none',
-                            padding: '8px 15px',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        🏠 トップ
-                    </button>
-
-                    <button
-                        onClick={handleGoToTaskList}
-                        style={{
-                            backgroundColor: (currentPage === 'task' || currentPage === 'task-create') ? '#007bff' : 'transparent',
-                            color: '#fff',
-                            border: 'none',
-                            padding: '8px 15px',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        📋 タスク管理
-                    </button>
-
-                    <button
-                        onClick={handleGoToResourceList}
-                        style={{
-                            backgroundColor: (currentPage === 'resource' || currentPage === 'resource-create') ? '#28a745' : 'transparent',
-                            color: '#fff',
-                            border: 'none',
-                            padding: '8px 15px',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        👤 リソース管理
-                    </button>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <span style={{ fontSize: '14px' }}>
-                        👤 {auth.username} 様 ({isAdmin ? '管理者' : '一般'})
-                    </span>
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            backgroundColor: '#dc3545',
-                            color: '#fff',
-                            border: 'none',
-                            padding: '6px 12px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '13px'
-                        }}
-                    >
-                        ログアウト
-                    </button>
-                </div>
-            </nav>
+                <span style={{ fontSize: '14px', color: '#333' }}>
+                    👤 {auth.username} 様 ({isAdmin ? '管理者' : '一般'})
+                </span>
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        backgroundColor: '#dc3545',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '13px'
+                    }}
+                >
+                    ログアウト
+                </button>
+            </header>
 
             {/* ページの動的切替 */}
-            <main>
-                {/* TopPage に auth 情報を渡すことで、トップ画面内でロールに応じたボタン制御を実行 */}
+            <main style={{ padding: '20px' }}>
                 {currentPage === 'top' && (
                     <TopPage auth={auth} onNavigate={setCurrentPage} />
                 )}
@@ -154,13 +108,16 @@ export function App() {
                 {currentPage === 'task' && (
                     <TaskListPage
                         credentials={auth.credentials}
+                        auth={auth}
                         onNavigateToCreate={handleGoToTaskCreate}
                         onEditTask={handleGoToTaskEdit}
+                        onBackToTop={() => setCurrentPage('top')}
                     />
                 )}
                 {currentPage === 'task-create' && (
                     <TaskCreatePage
                         credentials={auth.credentials}
+                        auth={auth}
                         initialTask={editingTask}
                         onCancel={handleGoToTaskList}
                         onSuccess={handleGoToTaskList}
@@ -173,6 +130,7 @@ export function App() {
                         credentials={auth.credentials}
                         onNavigateToCreate={handleGoToResourceCreate}
                         onEditResource={handleGoToResourceEdit}
+                        onBackToTop={() => setCurrentPage('top')}
                     />
                 )}
                 {currentPage === 'resource-create' && (
@@ -189,7 +147,7 @@ export function App() {
                     <RegisterForm
                         credentials={auth.credentials}
                         onSuccess={() => setCurrentPage('top')}
-                        onNavigateTop={() => setCurrentPage('top')} // ★ 追加
+                        onNavigateTop={() => setCurrentPage('top')}
                     />
                 )}
             </main>

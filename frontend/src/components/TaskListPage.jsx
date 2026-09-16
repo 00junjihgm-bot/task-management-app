@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 // APIのベースURL
 const API_TASK_URL = 'http://localhost:8080/api/tasks';
 
-export function TaskListPage({ credentials, auth, isAdmin: propIsAdmin, onNavigateToCreate, onEditTask }) {
+export function TaskListPage({ credentials, auth, isAdmin: propIsAdmin, onNavigateToCreate, onEditTask, onBackToTop }) {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -139,6 +139,18 @@ export function TaskListPage({ credentials, auth, isAdmin: propIsAdmin, onNaviga
 
     return (
         <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+            {/* ★ トップに戻るボタンを左上に配置 */}
+            {onBackToTop && (
+                <div style={{ marginBottom: '15px' }}>
+                    <button
+                        onClick={onBackToTop}
+                        style={{ padding: '6px 12px', backgroundColor: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px' }}
+                    >
+                        ← トップに戻る
+                    </button>
+                </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <h1>📋 タスク一覧</h1>
                 {onNavigateToCreate && (

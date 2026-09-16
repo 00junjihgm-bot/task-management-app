@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API_RESOURCE_URL = 'http://localhost:8080/api/resources';
 
-export function ResourceListPage({ credentials, onNavigateToCreate, onEditResource }) {
+export function ResourceListPage({ credentials, onNavigateToCreate, onEditResource, onBackToTop }) {
     const [resources, setResources] = useState([]);
     const [error, setError] = useState('');
 
@@ -65,6 +65,18 @@ export function ResourceListPage({ credentials, onNavigateToCreate, onEditResour
 
     return (
         <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+            {/* ★ トップに戻るボタンを左上に配置 */}
+            {onBackToTop && (
+                <div style={{ marginBottom: '15px' }}>
+                    <button
+                        onClick={onBackToTop}
+                        style={{ padding: '6px 12px', backgroundColor: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px' }}
+                    >
+                        ← トップに戻る
+                    </button>
+                </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <h1>👤 リソース（担当者）一覧</h1>
                 <button
@@ -118,3 +130,5 @@ export function ResourceListPage({ credentials, onNavigateToCreate, onEditResour
         </div>
     );
 }
+
+export default ResourceListPage;
