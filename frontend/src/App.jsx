@@ -3,23 +3,23 @@ import { LoginForm } from './components/LoginForm';
 import { TopPage } from './components/TopPage';
 import { TaskListPage } from './components/TaskListPage';
 import { TaskCreatePage } from './components/TaskCreatePage';
-import { ResourceRegisterPage } from './components/ResourceRegisterPage';
+import { ResourceListPage } from './components/ResourceListPage';
+import { ResourceCreatePage } from './components/ResourceCreatePage';
 
 export function App() {
-    // ログイン認証情報 ({ username, roles, credentials })
     const [auth, setAuth] = useState(null);
-    // 表示中のページを管理 ('top' | 'task' | 'task-create' | 'resource')
+    // 表示中のページを管理 ('top' | 'task' | 'task-create' | 'resource' | 'resource-create')
     const [currentPage, setCurrentPage] = useState('top');
-    // 編集対象のタスクデータ（新規登録時は null）
-    const [editingTask, setEditingTask] = useState(null);
 
-    // ログイン成功時の処理
+    // 編集用ステート
+    const [editingTask, setEditingTask] = useState(null);
+    const [editingResource, setEditingResource] = useState(null);
+
     const handleLoginSuccess = (authData) => {
         setAuth(authData);
         setCurrentPage('top');
     };
 
-    // ログアウト処理
     const handleLogout = () => {
         setAuth(null);
         setCurrentPage('top');
@@ -41,12 +41,26 @@ export function App() {
         setCurrentPage('task');
     };
 
-    // 未ログイン時
+    // --- リソース画面用の遷移ハンドラー ---
+    const handleGoToResourceCreate = () => {
+        setEditingResource(null);
+        setCurrentPage('resource-create');
+    };
+
+    const handleGoToResourceEdit = (resource) => {
+        setEditingResource(resource);
+        setCurrentPage('resource-create');
+    };
+
+    const handleGoToResourceList = () => {
+        setEditingResource(null);
+        setCurrentPage('resource');
+    };
+
     if (!auth) {
         return <LoginForm onLoginSuccess={handleLoginSuccess} />;
     }
 
-    // ログイン完了時
     return (
         <div>
             {/* 共通ヘッダーナビゲーション */}
@@ -88,9 +102,9 @@ export function App() {
                     </button>
 
                     <button
-                        onClick={() => setCurrentPage('resource')}
+                        onClick={handleGoToResourceList}
                         style={{
-                            backgroundColor: currentPage === 'resource' ? '#28a745' : 'transparent',
+                            backgroundColor: (currentPage === 'resource' || currentPage === 'resource-create') ? '#28a745' : 'transparent',
                             color: '#fff',
                             border: 'none',
                             padding: '8px 15px',
@@ -102,7 +116,6 @@ export function App() {
                     </button>
                 </div>
 
-                {/* ログイン中のユーザー情報 & ログアウトボタン */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <span style={{ fontSize: '14px' }}>👤 {auth.username} 様</span>
                     <button
@@ -128,6 +141,7 @@ export function App() {
                     <TopPage onNavigate={setCurrentPage} />
                 )}
 
+                {/* タスク一覧・登録 */}
                 {currentPage === 'task' && (
                     <TaskListPage
                         credentials={auth.credentials}
@@ -135,7 +149,6 @@ export function App() {
                         onEditTask={handleGoToTaskEdit}
                     />
                 )}
-
                 {currentPage === 'task-create' && (
                     <TaskCreatePage
                         credentials={auth.credentials}
@@ -145,8 +158,21 @@ export function App() {
                     />
                 )}
 
+                {/* リソース一覧・登録 */}
                 {currentPage === 'resource' && (
-                    <ResourceRegisterPage credentials={auth.credentials} />
+                    <ResourceListPage
+                        credentials={auth.credentials}
+                        onNavigateToCreate={handleGoToResourceCreate}
+                        onEditResource={handleGoToResourceEdit}
+                    />
+                )}
+                {currentPage === 'resource-create' && (
+                    <ResourceCreatePage
+                        credentials={auth.credentials}
+                        initialResource={editingResource}
+                        onCancel={handleGoToResourceList}
+                        onSuccess={handleGoToResourceList}
+                    />
                 )}
             </main>
         </div>
