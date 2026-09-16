@@ -61,7 +61,7 @@ public class TaskService {
 
     // DTOからTaskエンティティへのデータ移送処理（共通化）
     private void copyDtoToEntity(TaskRequestDto dto, Task task) {
-        task.setTaskname(dto.getTaskname());
+        task.setTaskName(dto.getTaskName());
         task.setDeadline(dto.getDeadline());
         task.setComplete(dto.getComplete());
         task.setCheckFlag(dto.getCheckFlag() != null ? dto.getCheckFlag() : false);

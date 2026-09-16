@@ -7,14 +7,29 @@ export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }
     const [resources, setResources] = useState([]);
     const [error, setError] = useState('');
 
+    // 初期入力データの設定
     const [formData, setFormData] = useState({
-        id: initialTask?.id ?? initialTask?.taskId ?? '',
+        id: initialTask?.taskId ?? initialTask?.id ?? '',
         taskName: initialTask?.taskName ?? initialTask?.title ?? '',
         resourceId: initialTask?.resourceId ?? '',
-        dueDate: initialTask?.dueDate ?? '',
+        dueDate: initialTask?.deadline ?? initialTask?.dueDate ?? '',
         status: initialTask?.status ?? '未着手',
-        completed: initialTask?.completed ?? false,
+        completed: initialTask?.checkFlag ?? initialTask?.completed ?? false,
     });
+
+    // initialTask が渡された（編集ボタンが押された）際にフォームデータをセット
+    useEffect(() => {
+        if (initialTask) {
+            setFormData({
+                id: initialTask.taskId ?? initialTask.id ?? '',
+                taskName: initialTask.taskName ?? initialTask.title ?? '',
+                resourceId: initialTask.resourceId ?? '',
+                dueDate: initialTask.deadline ?? initialTask.dueDate ?? '',
+                status: initialTask.status ?? '未着手',
+                completed: initialTask.checkFlag ?? initialTask.completed ?? false,
+            });
+        }
+    }, [initialTask]);
 
     const getAuthHeaders = useCallback((customHeaders = {}) => {
         const headers = { ...customHeaders };
@@ -24,6 +39,7 @@ export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }
         return headers;
     }, [credentials]);
 
+    // 担当者一覧を取得
     useEffect(() => {
         let isMounted = true;
         const fetchResources = async () => {
@@ -59,12 +75,16 @@ export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }
         const method = isEdit ? 'PUT' : 'POST';
         const url = isEdit ? `${API_TASK_URL}/${formData.id}` : API_TASK_URL;
 
+        // バックエンドが受け取るプロパティ名に合わせて送信用ペイロードを作成
         const payload = {
+            taskId: isEdit ? Number(formData.id) : undefined,
             id: isEdit ? Number(formData.id) : undefined,
             taskName: formData.taskName,
             resourceId: formData.resourceId ? Number(formData.resourceId) : null,
+            deadline: formData.dueDate,
             dueDate: formData.dueDate,
             status: formData.status,
+            checkFlag: formData.completed,
             completed: formData.completed,
         };
 
