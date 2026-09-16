@@ -1,6 +1,9 @@
 import React from 'react';
 
-export function TopPage({ onNavigate }) {
+export function TopPage({ auth, onNavigate }) {
+    // ログインユーザーが ROLE_ADMIN 権限を持っているか判定
+    const isAdmin = auth?.roles && auth.roles.includes('ROLE_ADMIN');
+
     return (
         <div style={{ textAlign: 'center', padding: '50px 20px', fontFamily: 'sans-serif' }}>
             <h1 style={{ marginBottom: '10px', color: '#333' }}>タスク＆リソース管理システム</h1>
@@ -50,6 +53,29 @@ export function TopPage({ onNavigate }) {
                         担当者の新規追加、情報編集、削除を行います。
                     </p>
                 </div>
+
+                {/* ★ ROLE_ADMIN 専用：ユーザーアカウント登録ボタン */}
+                {isAdmin && (
+                    <div
+                        onClick={() => onNavigate('user-create')}
+                        style={{
+                            border: '1px solid #ffeba2',
+                            borderRadius: '12px',
+                            padding: '30px',
+                            width: '220px',
+                            cursor: 'pointer',
+                            backgroundColor: '#fffdf5',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+                            transition: 'transform 0.2s, box-shadow 0.2s'
+                        }}
+                    >
+                        <div style={{ fontSize: '40px', marginBottom: '10px' }}>🔐</div>
+                        <h2 style={{ fontSize: '20px', margin: '10px 0', color: '#d97706' }}>ユーザーアカウント登録</h2>
+                        <p style={{ fontSize: '14px', color: '#666', margin: 0 }}>
+                            新規ユーザーアカウントを追加します（管理者専用）。
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+@SuppressWarnings("unused")
 public class RegisterRequestDto {
 
     private String username;

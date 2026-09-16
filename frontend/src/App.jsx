@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LoginForm } from './components/LoginForm';
+import { RegisterForm } from './components/RegisterForm';
 import { TopPage } from './components/TopPage';
 import { TaskListPage } from './components/TaskListPage';
 import { TaskCreatePage } from './components/TaskCreatePage';
@@ -8,7 +9,8 @@ import { ResourceCreatePage } from './components/ResourceCreatePage';
 
 export function App() {
     const [auth, setAuth] = useState(null);
-    // 表示中のページを管理 ('top' | 'task' | 'task-create' | 'resource' | 'resource-create')
+
+    // 表示中のページを管理 ('top' | 'task' | 'task-create' | 'resource' | 'resource-create' | 'user-create')
     const [currentPage, setCurrentPage] = useState('top');
 
     // 編集用ステート
@@ -57,9 +59,13 @@ export function App() {
         setCurrentPage('resource');
     };
 
+    // 未認証時は LoginForm のみ表示
     if (!auth) {
         return <LoginForm onLoginSuccess={handleLoginSuccess} />;
     }
+
+    // ログインユーザーが ROLE_ADMIN 権限を持っているか判定
+    const isAdmin = auth.roles && auth.roles.includes('ROLE_ADMIN');
 
     return (
         <div>
@@ -117,7 +123,9 @@ export function App() {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <span style={{ fontSize: '14px' }}>👤 {auth.username} 様</span>
+                    <span style={{ fontSize: '14px' }}>
+                        👤 {auth.username} 様 ({isAdmin ? '管理者' : '一般'})
+                    </span>
                     <button
                         onClick={handleLogout}
                         style={{
@@ -137,8 +145,9 @@ export function App() {
 
             {/* ページの動的切替 */}
             <main>
+                {/* TopPage に auth 情報を渡すことで、トップ画面内でロールに応じたボタン制御を実行 */}
                 {currentPage === 'top' && (
-                    <TopPage onNavigate={setCurrentPage} />
+                    <TopPage auth={auth} onNavigate={setCurrentPage} />
                 )}
 
                 {/* タスク一覧・登録 */}
@@ -174,7 +183,18 @@ export function App() {
                         onSuccess={handleGoToResourceList}
                     />
                 )}
+
+                {/* トップ画面の「ユーザーアカウント登録」カードをクリックした際に表示 */}
+                {currentPage === 'user-create' && isAdmin && (
+                    <RegisterForm
+                        credentials={auth.credentials}
+                        onSuccess={() => setCurrentPage('top')}
+                        onNavigateTop={() => setCurrentPage('top')} // ★ 追加
+                    />
+                )}
             </main>
         </div>
     );
 }
+
+export default App;

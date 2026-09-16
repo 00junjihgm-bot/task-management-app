@@ -2,6 +2,7 @@ package com.example.demo.dto;
 
 import java.time.LocalDate;
 
+@SuppressWarnings("unused")
 public class TaskRequestDto {
 
     private String taskName;

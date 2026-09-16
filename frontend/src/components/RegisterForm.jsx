@@ -1,40 +1,40 @@
 import React, { useState } from 'react';
 
-const API_BASE_URL = 'http://localhost:8080'; // バックエンドのベースURL
+const API_BASE_URL = 'http://localhost:8080';
 
-export function LoginForm({ onLoginSuccess }) {
+export function RegisterForm({ credentials, onSuccess, onNavigateTop }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setMessage('');
         setLoading(true);
 
-        // 日本語文字が含まれていても安全に Base64 エンコードする処理
-        const credentials = btoa(unescape(encodeURIComponent(`${username}:${password}`)));
-
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-                method: 'GET',
+            const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                method: 'POST',
                 headers: {
-                    'Authorization': `Basic ${credentials}`,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${credentials}`
+                },
+                body: JSON.stringify({ username, password })
             });
 
             if (response.ok) {
-                const userData = await response.json();
-                // ログイン成功情報を呼び出し元 (App.jsx) に通知
-                onLoginSuccess({
-                    username: userData.username,
-                    roles: userData.roles,
-                    credentials // 以降の各API呼び出し時に Authorization ヘッダーで使用
-                });
+                setMessage('新しいユーザーアカウントを作成しました');
+                setUsername('');
+                setPassword('');
+                if (onSuccess) onSuccess();
+            } else if (response.status === 403) {
+                setError('権限エラー: ユーザー作成は管理者（ROLE_ADMIN）のみ可能です');
             } else {
-                setError('ユーザー名またはパスワードが正しくありません');
+                const text = await response.text();
+                setError(text || '登録に失敗しました');
             }
         } catch (err) {
             setError('通信エラーが発生しました');
@@ -45,7 +45,8 @@ export function LoginForm({ onLoginSuccess }) {
 
     return (
         <div style={{ maxWidth: '360px', margin: '40px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', fontFamily: 'sans-serif' }}>
-            <h2>タスク管理アプリ</h2>
+            <h2>👤 ユーザーアカウント作成</h2>
+            {message && <p style={{ color: 'green', fontSize: '14px' }}>{message}</p>}
             {error && <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>}
 
             <form onSubmit={handleSubmit}>
@@ -77,18 +78,37 @@ export function LoginForm({ onLoginSuccess }) {
                     style={{
                         width: '100%',
                         padding: '10px',
-                        backgroundColor: loading ? '#6c757d' : '#007bff',
+                        backgroundColor: loading ? '#6c757d' : '#28a745',
                         color: '#fff',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: loading ? 'not-allowed' : 'pointer'
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        marginBottom: '15px'
                     }}
                 >
-                    {loading ? 'ログイン中...' : 'ログイン'}
+                    {loading ? '登録中...' : 'ユーザーを作成'}
                 </button>
             </form>
+
+            {/* ★「トップページへ」戻るボタン */}
+            <div style={{ textAlign: 'center' }}>
+                <button
+                    onClick={onNavigateTop}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#007bff',
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        padding: 0,
+                        fontSize: '14px'
+                    }}
+                >
+                    🏠 トップページへ
+                </button>
+            </div>
         </div>
     );
 }
 
-export default LoginForm;
+export default RegisterForm;
