@@ -3,10 +3,34 @@ import React, { useState, useEffect } from 'react';
 // APIのベースURL
 const API_TASK_URL = 'http://localhost:8080/api/tasks';
 
-export function TaskListPage({ credentials, onNavigateToCreate, onEditTask }) {
+export function TaskListPage({ credentials, auth, isAdmin: propIsAdmin, onNavigateToCreate, onEditTask }) {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // 【管理者判定のロジック】
+    let isAdmin = propIsAdmin ?? false;
+
+    if (!isAdmin && auth) {
+        const roles = auth.roles ?? auth.role;
+        if (Array.isArray(roles)) {
+            isAdmin = roles.some(r => r.toUpperCase().includes('ADMIN'));
+        } else if (typeof roles === 'string') {
+            isAdmin = roles.toUpperCase().includes('ADMIN');
+        }
+    }
+
+    if (!isAdmin && credentials) {
+        try {
+            const decoded = atob(credentials);
+            const username = decoded.split(':')[0];
+            if (username === 'admin') {
+                isAdmin = true;
+            }
+        } catch (e) {
+            // デコード失敗時は無視
+        }
+    }
 
     // 認証ヘッダーの取得
     const getAuthHeaders = (extraHeaders = {}) => {
@@ -27,7 +51,6 @@ export function TaskListPage({ credentials, onNavigateToCreate, onEditTask }) {
                 headers: getAuthHeaders(),
             });
 
-            // throw を使わず直接処理を打ち切ることで「ローカルでキャッチ」警告を解消
             if (!res.ok) {
                 setError(`タスク一覧の取得に失敗しました (Status: ${res.status})`);
                 return;
@@ -55,11 +78,9 @@ export function TaskListPage({ credentials, onNavigateToCreate, onEditTask }) {
             return;
         }
 
-        // トグル後の完了状態
         const currentCompleted = Boolean(task.checkFlag ?? task.completed ?? (task.status === '完了'));
         const nextCompletedState = !currentCompleted;
 
-        // TaskRequestDto のプロパティ名に完全に統一した送信データ (Payload)
         const dtoPayload = {
             taskName: task.taskName,
             deadline: task.deadline || null,
@@ -82,9 +103,7 @@ export function TaskListPage({ credentials, onNavigateToCreate, onEditTask }) {
                 return;
             }
 
-            // 更新成功後、最新のタスク一覧を再取得
             await fetchTasks();
-            void fetchTasks();
         } catch (err) {
             console.error('通信エラー:', err);
             setError('サーバーとの通信に失敗しました');
@@ -93,6 +112,11 @@ export function TaskListPage({ credentials, onNavigateToCreate, onEditTask }) {
 
     // 3. タスク削除処理 (DELETE)
     const handleDelete = async (id) => {
+        if (!isAdmin) {
+            setError('権限エラー: 削除は管理者のみ可能です');
+            return;
+        }
+
         if (!window.confirm('本当に削除しますか？')) return;
         setError(null);
 
@@ -105,7 +129,7 @@ export function TaskListPage({ credentials, onNavigateToCreate, onEditTask }) {
                 setError('削除に失敗しました');
                 return;
             }
-            await void fetchTasks();
+            await fetchTasks();
         } catch {
             setError('サーバーとの通信に失敗しました');
         }
@@ -173,8 +197,15 @@ export function TaskListPage({ credentials, onNavigateToCreate, onEditTask }) {
                                 <td>{task.deadline || '-'}</td>
                                 <td>{isCompleted ? '完了' : '未完了'}</td>
                                 <td>
-                                    {onEditTask && <button onClick={() => onEditTask(task)}>編集</button>}{' '}
-                                    <button onClick={() => handleDelete(taskId)}>削除</button>
+                                    {onEditTask && <button onClick={() => onEditTask(task)} style={{ marginRight: '5px' }}>編集</button>}
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => handleDelete(taskId)}
+                                            style={{ backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}
+                                        >
+                                            削除
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         );
@@ -185,3 +216,5 @@ export function TaskListPage({ credentials, onNavigateToCreate, onEditTask }) {
         </div>
     );
 }
+
+export default TaskListPage;

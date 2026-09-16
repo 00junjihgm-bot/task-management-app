@@ -112,7 +112,7 @@ export function ResourceCreatePage({ credentials, initialResource, onCancel, onS
                         {formData.id ? '更新する' : '登録する'}
                     </button>
                     <button type="button" onClick={onCancel} style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                        キャンセル（一覧へ戻る）
+                        一覧へ戻る
                     </button>
                 </div>
             </form>

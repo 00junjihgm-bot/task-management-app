@@ -1,32 +1,56 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const API_TASK_URL = 'http://localhost:8080/api/tasks';
 const API_RESOURCE_URL = 'http://localhost:8080/api/resources';
 
-export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }) {
+export function TaskCreatePage({ credentials, auth, isAdmin: propIsAdmin, initialTask, onCancel, onSuccess }) {
     const [resources, setResources] = useState([]);
     const [error, setError] = useState('');
+
+    // 【管理者判定のロジック】
+    let isAdmin = propIsAdmin ?? false;
+
+    if (!isAdmin && auth) {
+        const roles = auth.roles ?? auth.role;
+        if (Array.isArray(roles)) {
+            isAdmin = roles.some(r => r.toUpperCase().includes('ADMIN'));
+        } else if (typeof roles === 'string') {
+            isAdmin = roles.toUpperCase().includes('ADMIN');
+        }
+    }
+
+    if (!isAdmin && credentials) {
+        try {
+            const decoded = atob(credentials);
+            const username = decoded.split(':')[0];
+            if (username === 'admin') {
+                isAdmin = true;
+            }
+        } catch (e) {
+            // デコード失敗時は無視
+        }
+    }
 
     // 初期入力データの設定
     const [formData, setFormData] = useState({
         id: initialTask?.taskId ?? initialTask?.id ?? '',
         taskName: initialTask?.taskName ?? initialTask?.title ?? '',
-        resourceId: initialTask?.resourceId ?? '',
+        resourceId: initialTask?.resourceId ?? initialTask?.resource?.resourceId ?? initialTask?.resource?.id ?? '',
         dueDate: initialTask?.deadline ?? initialTask?.dueDate ?? '',
+        complete: initialTask?.complete ?? '',
         status: initialTask?.status ?? '未着手',
-        completed: initialTask?.checkFlag ?? initialTask?.completed ?? false,
     });
 
-    // initialTask が渡された（編集ボタンが押された）際にフォームデータをセット
+    // initialTask が渡された際にフォームデータをセット
     useEffect(() => {
         if (initialTask) {
             setFormData({
                 id: initialTask.taskId ?? initialTask.id ?? '',
                 taskName: initialTask.taskName ?? initialTask.title ?? '',
-                resourceId: initialTask.resourceId ?? '',
+                resourceId: initialTask.resourceId ?? initialTask?.resource?.resourceId ?? initialTask?.resource?.id ?? '',
                 dueDate: initialTask.deadline ?? initialTask.dueDate ?? '',
+                complete: initialTask.complete ?? '',
                 status: initialTask.status ?? '未着手',
-                completed: initialTask.checkFlag ?? initialTask.completed ?? false,
             });
         }
     }, [initialTask]);
@@ -83,9 +107,9 @@ export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }
             resourceId: formData.resourceId ? Number(formData.resourceId) : null,
             deadline: formData.dueDate,
             dueDate: formData.dueDate,
+            complete: formData.complete || null,
             status: formData.status,
-            checkFlag: formData.completed,
-            completed: formData.completed,
+            checkFlag: formData.status === '完了', // ステータスに連動させる場合
         };
 
         try {
@@ -111,6 +135,12 @@ export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }
         <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
             <h1>{formData.id ? `タスク編集 (ID: ${formData.id})` : '新規タスク登録'}</h1>
 
+            {!isAdmin && formData.id && (
+                <div style={{ color: '#0c5460', backgroundColor: '#d1ecf1', padding: '10px', marginBottom: '15px', borderRadius: '4px' }}>
+                    ※一般ユーザーのため、「実施日」と「ステータス」のみ変更可能です。
+                </div>
+            )}
+
             {error && (
                 <div style={{ color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', marginBottom: '15px', borderRadius: '4px' }}>
                     {error}
@@ -126,7 +156,13 @@ export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }
                         value={formData.taskName}
                         onChange={handleChange}
                         required
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        disabled={!isAdmin && Boolean(formData.id)} // 一般ユーザーの編集時は無効化
+                        style={{
+                            width: '100%',
+                            padding: '8px',
+                            boxSizing: 'border-box',
+                            backgroundColor: !isAdmin && Boolean(formData.id) ? '#e9ecef' : '#fff'
+                        }}
                     />
                 </div>
 
@@ -136,7 +172,13 @@ export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }
                         name="resourceId"
                         value={formData.resourceId}
                         onChange={handleChange}
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        disabled={!isAdmin && Boolean(formData.id)}
+                        style={{
+                            width: '100%',
+                            padding: '8px',
+                            boxSizing: 'border-box',
+                            backgroundColor: !isAdmin && Boolean(formData.id) ? '#e9ecef' : '#fff'
+                        }}
                     >
                         <option value="">未設定</option>
                         {resources.map((r) => {
@@ -157,10 +199,29 @@ export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }
                         name="dueDate"
                         value={formData.dueDate}
                         onChange={handleChange}
+                        disabled={!isAdmin && Boolean(formData.id)}
+                        style={{
+                            width: '100%',
+                            padding: '8px',
+                            boxSizing: 'border-box',
+                            backgroundColor: !isAdmin && Boolean(formData.id) ? '#e9ecef' : '#fff'
+                        }}
+                    />
+                </div>
+
+                {/* 実施日（complete）- 一般ユーザーも編集可能 */}
+                <div style={{ marginBottom: '15px' }}>
+                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>実施日:</label>
+                    <input
+                        type="date"
+                        name="complete"
+                        value={formData.complete}
+                        onChange={handleChange}
                         style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
                     />
                 </div>
 
+                {/* ステータス - 一般ユーザーも編集可能 */}
                 <div style={{ marginBottom: '15px' }}>
                     <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>ステータス:</label>
                     <select
@@ -180,10 +241,12 @@ export function TaskCreatePage({ credentials, initialTask, onCancel, onSuccess }
                         {formData.id ? '更新する' : '登録する'}
                     </button>
                     <button type="button" onClick={onCancel} style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                        キャンセル（一覧へ戻る）
+                        一覧へ戻る
                     </button>
                 </div>
             </form>
         </div>
     );
 }
+
+export default TaskCreatePage;
