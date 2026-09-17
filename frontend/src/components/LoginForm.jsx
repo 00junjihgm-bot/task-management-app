@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import './LoginForm.css'; // 専用CSSのインポート
 
 const API_BASE_URL = 'http://localhost:8080'; // バックエンドのベースURL
 
@@ -44,45 +45,37 @@ export function LoginForm({ onLoginSuccess }) {
     };
 
     return (
-        <div style={{ maxWidth: '360px', margin: '40px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', fontFamily: 'sans-serif' }}>
+        <div className="login-container">
             <h2>タスク管理アプリ</h2>
-            {error && <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>}
+            {error && <p className="login-error">{error}</p>}
 
             <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '12px' }}>
-                    <label style={{ display: 'block', marginBottom: '4px' }}>ユーザー名</label>
+                <div className="login-group">
+                    <label className="login-label">ユーザー名</label>
                     <input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        className="login-input"
                     />
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', marginBottom: '4px' }}>パスワード</label>
+                <div className="login-group-last">
+                    <label className="login-label">パスワード</label>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        className="login-input"
                     />
                 </div>
 
                 <button
                     type="submit"
                     disabled={loading}
-                    style={{
-                        width: '100%',
-                        padding: '10px',
-                        backgroundColor: loading ? '#6c757d' : '#007bff',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: loading ? 'not-allowed' : 'pointer'
-                    }}
+                    className={`login-submit-btn ${loading ? 'login-loading' : ''}`}
                 >
                     {loading ? 'ログイン中...' : 'ログイン'}
                 </button>

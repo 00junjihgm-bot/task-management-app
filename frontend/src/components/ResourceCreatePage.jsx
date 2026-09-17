@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import './ResourceCreatePage.css'; // 専用CSSのインポート
 
 const API_RESOURCE_URL = 'http://localhost:8080/api/resources';
 
@@ -63,55 +64,55 @@ export function ResourceCreatePage({ credentials, initialResource, onCancel, onS
     };
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
+        <div className="resource-create-container">
             <h1>{formData.id ? `リソース編集 (ID: ${formData.id})` : '新規リソース登録'}</h1>
 
             {error && (
-                <div style={{ color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', marginBottom: '15px', borderRadius: '4px' }}>
+                <div className="resource-create-error">
                     {error}
                 </div>
             )}
 
-            <form onSubmit={(e) => void handleSubmit(e)} style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>氏名 *:</label>
+            <form onSubmit={(e) => void handleSubmit(e)} className="resource-create-form">
+                <div className="resource-create-group">
+                    <label className="resource-create-label">氏名 *:</label>
                     <input
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
                         required
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        className="resource-create-input"
                     />
                 </div>
 
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>所属部署:</label>
+                <div className="resource-create-group">
+                    <label className="resource-create-label">所属部署:</label>
                     <input
                         type="text"
                         name="department"
                         value={formData.department}
                         onChange={handleChange}
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        className="resource-create-input"
                     />
                 </div>
 
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>メールアドレス:</label>
+                <div className="resource-create-group">
+                    <label className="resource-create-label">メールアドレス:</label>
                     <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        className="resource-create-input"
                     />
                 </div>
 
-                <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                    <button type="submit" style={{ padding: '8px 16px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                <div className="resource-create-actions">
+                    <button type="submit" className="resource-btn-submit">
                         {formData.id ? '更新する' : '登録する'}
                     </button>
-                    <button type="button" onClick={onCancel} style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                    <button type="button" onClick={onCancel} className="resource-btn-cancel">
                         一覧へ戻る
                     </button>
                 </div>
@@ -119,3 +120,5 @@ export function ResourceCreatePage({ credentials, initialResource, onCancel, onS
         </div>
     );
 }
+
+export default ResourceCreatePage;

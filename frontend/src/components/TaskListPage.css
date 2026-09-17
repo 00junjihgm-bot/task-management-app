@@ -1,0 +1,131 @@
+/* タスク一覧全体のコンテナ */
+.task-container {
+    padding: 20px;
+    font-family: sans-serif;
+}
+
+/* 読み込み中・エラーメッセージ等 */
+.task-loading {
+    padding: 20px;
+}
+
+.task-back-container {
+    margin-bottom: 15px;
+}
+
+.task-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.task-error-banner {
+    color: #721c24;
+    background-color: #f8d7da;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+/* テーブルスタイル */
+.task-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #dee2e6;
+}
+
+.task-table th,
+.task-table td {
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.task-table th {
+    background-color: #f2f2f2;
+}
+
+/* チェックボックス列の幅調整・中央寄せ */
+.col-checkbox {
+    width: 50px;
+    text-align: center;
+}
+
+.task-checkbox {
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+/* 完了タスクのスタイル（打ち消し線＆グレー文字・背景） */
+.task-row-completed {
+    background-color: #f9f9f9;
+}
+
+.task-name-completed {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.task-empty-cell {
+    text-align: center;
+    color: #666;
+}
+
+/* ボタン各種 */
+.task-btn-primary {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #0056b3;
+    }
+}
+
+.task-btn-secondary {
+    padding: 6px 12px;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #5a6268;
+    }
+}
+
+.task-btn-edit {
+    padding: 4px 8px;
+    margin-right: 5px;
+    background-color: #e2e8f0;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #cbd5e1;
+    }
+}
+
+.task-btn-delete {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #c82333;
+    }
+}

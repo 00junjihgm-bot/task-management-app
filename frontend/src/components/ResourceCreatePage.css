@@ -1,0 +1,76 @@
+/* 全体コンテナ */
+.resource-create-container {
+    padding: 20px;
+    font-family: sans-serif;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* エラー表示 */
+.resource-create-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+/* フォーム本体の外枠 */
+.resource-create-form {
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+/* フォームグループ */
+.resource-create-group {
+    margin-bottom: 15px;
+}
+
+.resource-create-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.resource-create-input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* ボタン群 */
+.resource-create-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.resource-btn-submit {
+    padding: 8px 16px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.resource-btn-submit:hover {
+    background-color: #218838;
+}
+
+.resource-btn-cancel {
+    padding: 8px 16px;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.resource-btn-cancel:hover {
+    background-color: #5a6268;
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import './ResourceListPage.css'; // 専用CSSのインポート
 
 const API_RESOURCE_URL = 'http://localhost:8080/api/resources';
 
@@ -64,38 +65,38 @@ export function ResourceListPage({ credentials, onNavigateToCreate, onEditResour
     };
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+        <div className="resource-container">
             {/* ★ トップに戻るボタンを左上に配置 */}
             {onBackToTop && (
-                <div style={{ marginBottom: '15px' }}>
+                <div className="resource-back-container">
                     <button
                         onClick={onBackToTop}
-                        style={{ padding: '6px 12px', backgroundColor: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px' }}
+                        className="resource-btn-secondary"
                     >
                         ← トップに戻る
                     </button>
                 </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <div className="resource-header-row">
                 <h1>👤 リソース（担当者）一覧</h1>
                 <button
                     onClick={onNavigateToCreate}
-                    style={{ padding: '8px 16px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    className="resource-btn-primary"
                 >
                     ＋ 新規リソース登録
                 </button>
             </div>
 
             {error && (
-                <div style={{ color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', marginBottom: '15px', borderRadius: '4px' }}>
+                <div className="resource-error-banner">
                     {error}
                 </div>
             )}
 
-            <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table className="resource-table">
                 <thead>
-                <tr style={{ backgroundColor: '#f2f2f2' }}>
+                <tr>
                     <th>ID</th>
                     <th>氏名</th>
                     <th>所属部署</th>
@@ -106,7 +107,7 @@ export function ResourceListPage({ credentials, onNavigateToCreate, onEditResour
                 <tbody>
                 {resources.length === 0 ? (
                     <tr>
-                        <td colSpan="5" style={{ textAlign: 'center' }}>データがありません</td>
+                        <td colSpan="5" className="resource-empty-cell">データがありません</td>
                     </tr>
                 ) : (
                     resources.map((resource) => {
@@ -118,8 +119,18 @@ export function ResourceListPage({ credentials, onNavigateToCreate, onEditResour
                                 <td>{resource.department ?? '-'}</td>
                                 <td>{resource.email ?? '-'}</td>
                                 <td>
-                                    <button onClick={() => onEditResource(resource)}>編集</button>{' '}
-                                    <button onClick={() => void handleDelete(rId)}>削除</button>
+                                    <button
+                                        onClick={() => onEditResource(resource)}
+                                        className="resource-btn-edit"
+                                    >
+                                        編集
+                                    </button>
+                                    <button
+                                        onClick={() => void handleDelete(rId)}
+                                        className="resource-btn-delete"
+                                    >
+                                        削除
+                                    </button>
                                 </td>
                             </tr>
                         );

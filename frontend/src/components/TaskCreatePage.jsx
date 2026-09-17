@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import './TaskCreatePage.css'; // 専用CSSのインポート
 
 const API_TASK_URL = 'http://localhost:8080/api/tasks';
 const API_RESOURCE_URL = 'http://localhost:8080/api/resources';
@@ -99,7 +100,6 @@ export function TaskCreatePage({ credentials, auth, isAdmin: propIsAdmin, initia
         const method = isEdit ? 'PUT' : 'POST';
         const url = isEdit ? `${API_TASK_URL}/${formData.id}` : API_TASK_URL;
 
-        // バックエンドが受け取るプロパティ名に合わせて送信用ペイロードを作成
         const payload = {
             taskId: isEdit ? Number(formData.id) : undefined,
             id: isEdit ? Number(formData.id) : undefined,
@@ -109,7 +109,7 @@ export function TaskCreatePage({ credentials, auth, isAdmin: propIsAdmin, initia
             dueDate: formData.dueDate,
             complete: formData.complete || null,
             status: formData.status,
-            checkFlag: formData.status === '完了', // ステータスに連動させる場合
+            checkFlag: formData.status === '完了',
         };
 
         try {
@@ -131,54 +131,46 @@ export function TaskCreatePage({ credentials, auth, isAdmin: propIsAdmin, initia
         }
     };
 
+    const isFieldDisabled = !isAdmin && Boolean(formData.id);
+
     return (
-        <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' }}>
+        <div className="task-create-container">
             <h1>{formData.id ? `タスク編集 (ID: ${formData.id})` : '新規タスク登録'}</h1>
 
             {!isAdmin && formData.id && (
-                <div style={{ color: '#0c5460', backgroundColor: '#d1ecf1', padding: '10px', marginBottom: '15px', borderRadius: '4px' }}>
+                <div className="task-create-notice">
                     ※一般ユーザーのため、「実施日」と「ステータス」のみ変更可能です。
                 </div>
             )}
 
             {error && (
-                <div style={{ color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', marginBottom: '15px', borderRadius: '4px' }}>
+                <div className="task-create-error">
                     {error}
                 </div>
             )}
 
-            <form onSubmit={(e) => void handleSubmit(e)} style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>タスク名 *:</label>
+            <form onSubmit={(e) => void handleSubmit(e)} className="task-create-form">
+                <div className="task-form-group">
+                    <label className="task-form-label">タスク名 *:</label>
                     <input
                         type="text"
                         name="taskName"
                         value={formData.taskName}
                         onChange={handleChange}
                         required
-                        disabled={!isAdmin && Boolean(formData.id)} // 一般ユーザーの編集時は無効化
-                        style={{
-                            width: '100%',
-                            padding: '8px',
-                            boxSizing: 'border-box',
-                            backgroundColor: !isAdmin && Boolean(formData.id) ? '#e9ecef' : '#fff'
-                        }}
+                        disabled={isFieldDisabled}
+                        className={`task-form-input ${isFieldDisabled ? 'task-input-disabled' : ''}`}
                     />
                 </div>
 
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>担当者:</label>
+                <div className="task-form-group">
+                    <label className="task-form-label">担当者:</label>
                     <select
                         name="resourceId"
                         value={formData.resourceId}
                         onChange={handleChange}
-                        disabled={!isAdmin && Boolean(formData.id)}
-                        style={{
-                            width: '100%',
-                            padding: '8px',
-                            boxSizing: 'border-box',
-                            backgroundColor: !isAdmin && Boolean(formData.id) ? '#e9ecef' : '#fff'
-                        }}
+                        disabled={isFieldDisabled}
+                        className={`task-form-input ${isFieldDisabled ? 'task-input-disabled' : ''}`}
                     >
                         <option value="">未設定</option>
                         {resources.map((r) => {
@@ -192,55 +184,49 @@ export function TaskCreatePage({ credentials, auth, isAdmin: propIsAdmin, initia
                     </select>
                 </div>
 
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>期限:</label>
+                <div className="task-form-group">
+                    <label className="task-form-label">期限:</label>
                     <input
                         type="date"
                         name="dueDate"
                         value={formData.dueDate}
                         onChange={handleChange}
-                        disabled={!isAdmin && Boolean(formData.id)}
-                        style={{
-                            width: '100%',
-                            padding: '8px',
-                            boxSizing: 'border-box',
-                            backgroundColor: !isAdmin && Boolean(formData.id) ? '#e9ecef' : '#fff'
-                        }}
+                        disabled={isFieldDisabled}
+                        className={`task-form-input ${isFieldDisabled ? 'task-input-disabled' : ''}`}
                     />
                 </div>
 
                 {/* 実施日（complete）- 一般ユーザーも編集可能 */}
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>実施日:</label>
+                <div className="task-form-group">
+                    <label className="task-form-label">実施日:</label>
                     <input
                         type="date"
                         name="complete"
                         value={formData.complete}
                         onChange={handleChange}
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        className="task-form-input"
                     />
                 </div>
 
                 {/* ステータス - 一般ユーザーも編集可能 */}
-                <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>ステータス:</label>
+                <div className="task-form-group">
+                    <label className="task-form-label">ステータス:</label>
                     <select
                         name="status"
                         value={formData.status}
                         onChange={handleChange}
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                        className="task-form-input"
                     >
                         <option value="未着手">未着手</option>
-                        <option value="進行中">進行中</option>
                         <option value="完了">完了</option>
                     </select>
                 </div>
 
-                <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                    <button type="submit" style={{ padding: '8px 16px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                <div className="task-form-actions">
+                    <button type="submit" className="task-btn-submit">
                         {formData.id ? '更新する' : '登録する'}
                     </button>
-                    <button type="button" onClick={onCancel} style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                    <button type="button" onClick={onCancel} className="task-btn-cancel">
                         一覧へ戻る
                     </button>
                 </div>

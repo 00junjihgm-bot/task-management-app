@@ -1,0 +1,84 @@
+/* 全体コンテナ */
+.register-container {
+    max-width: 360px;
+    margin: 40px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: sans-serif;
+    background-color: #fff;
+}
+
+/* メッセージ・エラー */
+.register-message {
+    color: green;
+    font-size: 14px;
+}
+
+.register-error {
+    color: red;
+    font-size: 14px;
+}
+
+/* フォーム要素 */
+.register-group {
+    margin-bottom: 12px;
+}
+
+.register-group-last {
+    margin-bottom: 16px;
+}
+
+.register-label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+.register-input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 送信ボタン */
+.register-submit-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.register-submit-btn:hover {
+    background-color: #218838;
+}
+
+.register-submit-btn.register-loading {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* ナビゲーション（トップへ戻る） */
+.register-nav-container {
+    text-align: center;
+}
+
+.register-nav-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    font-size: 14px;
+}
+
+.register-nav-btn:hover {
+    color: #0056b3;
+}

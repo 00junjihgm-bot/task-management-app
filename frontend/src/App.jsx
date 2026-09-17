@@ -7,13 +7,12 @@ import { TaskCreatePage } from './components/TaskCreatePage';
 import { ResourceListPage } from './components/ResourceListPage';
 import { ResourceCreatePage } from './components/ResourceCreatePage';
 
+// 作成したCSSファイルをインポート
+import './App.css';
+
 export function App() {
     const [auth, setAuth] = useState(null);
-
-    // 表示中のページを管理 ('top' | 'task' | 'task-create' | 'resource' | 'resource-create' | 'user-create')
     const [currentPage, setCurrentPage] = useState('top');
-
-    // 編集用ステート
     const [editingTask, setEditingTask] = useState(null);
     const [editingResource, setEditingResource] = useState(null);
 
@@ -27,7 +26,6 @@ export function App() {
         setCurrentPage('top');
     };
 
-    // --- タスク画面用の遷移ハンドラー ---
     const handleGoToTaskCreate = () => {
         setEditingTask(null);
         setCurrentPage('task-create');
@@ -43,7 +41,6 @@ export function App() {
         setCurrentPage('task');
     };
 
-    // --- リソース画面用の遷移ハンドラー ---
     const handleGoToResourceCreate = () => {
         setEditingResource(null);
         setCurrentPage('resource-create');
@@ -59,52 +56,33 @@ export function App() {
         setCurrentPage('resource');
     };
 
-    // 未認証時は LoginForm のみ表示
     if (!auth) {
         return <LoginForm onLoginSuccess={handleLoginSuccess} />;
     }
 
-    // ログインユーザーが ROLE_ADMIN 権限を持っているか判定
     const isAdmin = auth.roles && auth.roles.includes('ROLE_ADMIN');
 
     return (
         <div>
-            {/* ヘッダーバー：ログイン者情報とログアウトボタン */}
-            <header style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                padding: '10px 20px',
-                backgroundColor: '#f8f9fa',
-                borderBottom: '1px solid #dee2e6',
-                gap: '15px'
-            }}>
-                <span style={{ fontSize: '14px', color: '#333' }}>
+            {/* ヘッダーバー：クラス名で指定 */}
+            <header className="app-header">
+                <span className="app-user-info">
                     👤 {auth.username} 様 ({isAdmin ? '管理者' : '一般'})
                 </span>
                 <button
                     onClick={handleLogout}
-                    style={{
-                        backgroundColor: '#dc3545',
-                        color: '#fff',
-                        border: 'none',
-                        padding: '6px 12px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '13px'
-                    }}
+                    className="app-logout-button"
                 >
                     ログアウト
                 </button>
             </header>
 
-            {/* ページの動的切替 */}
-            <main style={{ padding: '20px' }}>
+            {/* ページの動的切替：クラス名で指定 */}
+            <main className="app-main">
                 {currentPage === 'top' && (
                     <TopPage auth={auth} onNavigate={setCurrentPage} />
                 )}
 
-                {/* タスク一覧・登録 */}
                 {currentPage === 'task' && (
                     <TaskListPage
                         credentials={auth.credentials}
@@ -124,7 +102,6 @@ export function App() {
                     />
                 )}
 
-                {/* リソース一覧・登録 */}
                 {currentPage === 'resource' && (
                     <ResourceListPage
                         credentials={auth.credentials}
@@ -142,7 +119,6 @@ export function App() {
                     />
                 )}
 
-                {/* トップ画面の「ユーザーアカウント登録」カードをクリックした際に表示 */}
                 {currentPage === 'user-create' && isAdmin && (
                     <RegisterForm
                         credentials={auth.credentials}

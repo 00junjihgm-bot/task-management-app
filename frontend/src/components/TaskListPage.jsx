@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './TaskListPage.css'; // 専用CSSのインポート
 
 // APIのベースURL
 const API_TASK_URL = 'http://localhost:8080/api/tasks';
@@ -135,28 +136,28 @@ export function TaskListPage({ credentials, auth, isAdmin: propIsAdmin, onNaviga
         }
     };
 
-    if (loading) return <div style={{ padding: '20px' }}>読み込み中...</div>;
+    if (loading) return <div className="task-loading">読み込み中...</div>;
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+        <div className="task-container">
             {/* ★ トップに戻るボタンを左上に配置 */}
             {onBackToTop && (
-                <div style={{ marginBottom: '15px' }}>
+                <div className="task-back-container">
                     <button
                         onClick={onBackToTop}
-                        style={{ padding: '6px 12px', backgroundColor: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '14px' }}
+                        className="task-btn-secondary"
                     >
                         ← トップに戻る
                     </button>
                 </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <div className="task-header-row">
                 <h1>📋 タスク一覧</h1>
                 {onNavigateToCreate && (
                     <button
                         onClick={onNavigateToCreate}
-                        style={{ padding: '8px 16px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                        className="task-btn-primary"
                     >
                         ＋ 新規タスク登録
                     </button>
@@ -164,15 +165,15 @@ export function TaskListPage({ credentials, auth, isAdmin: propIsAdmin, onNaviga
             </div>
 
             {error && (
-                <div style={{ color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', marginBottom: '15px', borderRadius: '4px' }}>
+                <div className="task-error-banner">
                     {error}
                 </div>
             )}
 
-            <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table className="task-table">
                 <thead>
-                <tr style={{ backgroundColor: '#f2f2f2' }}>
-                    <th style={{ width: '50px', textAlign: 'center' }}>完了</th>
+                <tr>
+                    <th className="col-checkbox">完了</th>
                     <th>ID</th>
                     <th>タスク名</th>
                     <th>担当者</th>
@@ -184,7 +185,7 @@ export function TaskListPage({ credentials, auth, isAdmin: propIsAdmin, onNaviga
                 <tbody>
                 {tasks.length === 0 ? (
                     <tr>
-                        <td colSpan="7" style={{ textAlign: 'center' }}>データがありません</td>
+                        <td colSpan="7" className="task-empty-cell">データがありません</td>
                     </tr>
                 ) : (
                     tasks.map((task) => {
@@ -192,28 +193,35 @@ export function TaskListPage({ credentials, auth, isAdmin: propIsAdmin, onNaviga
                         const isCompleted = Boolean(task.checkFlag ?? task.completed ?? (task.status === '完了'));
 
                         return (
-                            <tr key={taskId} style={{ backgroundColor: isCompleted ? '#f9f9f9' : 'transparent' }}>
-                                <td style={{ textAlign: 'center' }}>
+                            <tr key={taskId} className={isCompleted ? 'task-row-completed' : ''}>
+                                <td className="col-checkbox">
                                     <input
                                         type="checkbox"
                                         checked={isCompleted}
                                         onChange={() => handleToggleComplete(task)}
-                                        style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+                                        className="task-checkbox"
                                     />
                                 </td>
                                 <td>{taskId}</td>
-                                <td style={{ textDecoration: isCompleted ? 'line-through' : 'none', color: isCompleted ? '#888' : '#000' }}>
+                                <td className={isCompleted ? 'task-name-completed' : ''}>
                                     {task.taskName || '(名称なし)'}
                                 </td>
                                 <td>{task.resourceName || task.resource?.name || '-'}</td>
                                 <td>{task.deadline || '-'}</td>
                                 <td>{isCompleted ? '完了' : '未完了'}</td>
                                 <td>
-                                    {onEditTask && <button onClick={() => onEditTask(task)} style={{ marginRight: '5px' }}>編集</button>}
+                                    {onEditTask && (
+                                        <button
+                                            onClick={() => onEditTask(task)}
+                                            className="task-btn-edit"
+                                        >
+                                            編集
+                                        </button>
+                                    )}
                                     {isAdmin && (
                                         <button
                                             onClick={() => handleDelete(taskId)}
-                                            style={{ backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}
+                                            className="task-btn-delete"
                                         >
                                             削除
                                         </button>

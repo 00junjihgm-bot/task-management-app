@@ -1,0 +1,91 @@
+/* TopPage 全体のレイアウト */
+.top-container {
+    text-align: center;
+    padding: 50px 20px;
+    font-family: sans-serif;
+}
+
+.top-title {
+    margin-bottom: 10px;
+    color: var(--text-h, #333);
+    font-size: 26px;
+}
+
+.top-subtitle {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* エラーメッセージ */
+.top-error-message {
+    margin-bottom: 20px;
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* カード一覧のグリッド配置 */
+.top-card-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* 各メニューカードの共通スタイル */
+.top-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 30px;
+    width: 220px;
+    cursor: pointer;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* 一般ユーザー向けに少しグレーアウトさせたい場合などの修飾 */
+.top-card-disabled {
+    background-color: #f8f9fa;
+}
+
+/* 管理者専用カードの特別カラー */
+.admin-card {
+    border-color: #ffeba2;
+    background-color: #fffdf5;
+}
+
+/* カード内部のパーツ */
+.top-card-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.top-card-title {
+    font-size: 20px;
+    margin: 10px 0;
+}
+
+/* 見出しごとの文字色 */
+.task-title {
+    color: #007bff;
+}
+
+.resource-title {
+    color: #28a745;
+}
+
+.admin-title {
+    color: #d97706;
+}
+
+.top-card-desc {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
